@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<!--
+  VISHWA HOMES PREMIUM — reference homepage template
+  Built to fix every finding in the UX/functionality audit. Real copy, real
+  project data, and real image assets from vishwahomespremium.in are used
+  throughout (URLs point at their existing CDN) so this can be compared
+  1:1 against the live site, then handed to a developer as a target.
+
+  Fix map (see audit report for full evidence):
+    F1  Contact section is fully static — no client component to crash.
+        Real phone/email/address always visible with no JS dependency.
+    F2  Trust-bar numbers are real values in the initial HTML (20 / 500+ / 100%).
+        JS only animates the count-up on scroll-into-view; it never
+        starts from an empty string, so no-JS and no-scroll visitors
+        still see the correct number.
+    F3  No orphaned widget-label text — every string is inside a real,
+        styled container. No stray "+", no unattached measurement labels.
+    F4  Map is a static styled card + "Get Directions" link (opens Google
+        Maps in a new tab) instead of a live iframe with raw Google chrome.
+    F5  Social proof is framed honestly (real 4.5★ rating, not stacked
+        misleadingly against unrelated scale claims).
+    D1  No clip-art / decorative dice or "spring roll" renders anywhere.
+        Only real project photography or plain space.
+    D2/D3/D4  The old "Awards" (placeholder definition text) and "Promises"
+        (headings with no body copy) sections are removed; every section
+        that ships has complete, real copy.
+    D5  Map + video are re-skinned: styled card / custom thumbnail with a
+        play button, instead of raw Google Maps and YouTube chrome.
+    D6  ONE brand name used everywhere: "Vishwa Homes Premium Projects
+        Pvt. Ltd." (nav, body copy, footer, meta tags all match).
+    D7  Copy has been proofread — no concatenated words.
+    D8  Hero carousel pagination is "01 / 02" with real spacing and
+        accessible labelled dots, not a run-on string.
+
+  Token system (house-ui Part 2, applied as plain CSS custom properties
+  so this file is framework-agnostic — see :root below):
+    background : #FFFFFF (committed white)
+    identity   : #0B1312 (their own near-black — carries text/structure)
+    accent     : #EED26D (their own gold — action + hover only, per R2)
+    Two saturated hues total, exactly as house-ui's palette rule requires.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vishwa Homes Premium Projects Pvt. Ltd. — Luxury Residential & Commercial Properties, Madurai</title>
+<meta name="description" content="Vishwa Homes Premium Projects Pvt. Ltd. builds luxury villas, apartments and commercial developments in Madurai — 20 years of experience, 500+ homes delivered, on-time.">
+<link rel="icon" href="https://vishwahomespremium.in/uploads/settings/1780396916904_23aa.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* ---------- Part 2 — Token architecture ---------- */
+  /* Light is the default token set (:root). Dark is a genuinely separate
+     set of values below — not filter:invert() and not the same greys
+     flipped (house-ui Part 3) — swapped by toggling [data-theme] on <html>.
+     --band-bg/--band-text are deliberately OUTSIDE the theme swap: the
+     hero, trust bar, trust note and footer are a fixed dark "band" used
+     as punctuation in both themes, the same way Skanska keeps its navy
+     band regardless of the rest of the page. */
+  :root{
+    color-scheme: light;
+
+    --color-bg:        #FFFFFF;
+    --color-surface:   #F6F5F1;
+    --color-border:    #E4E2DC;
+    --color-text:      #0B1312;
+    --color-text-muted:#5B615F;
+    --color-accent:    #8A6A16;   /* their gold, darkened to 5:1 on white — text/icon/border use (R5) */
+    --color-accent-soft:#EED26D;  /* their true brand gold, unaltered — fills + text on the fixed dark band */
+    --color-danger:    #B3261E;
+    --color-success:   #1E6B3C;
+
+    --band-bg:   #0B1312;
+    --band-text: #FFFFFF;
+
+    --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px;
+    --space-5: 24px; --space-6: 32px; --space-7: 48px; --space-8: 64px;
+    --space-9: 96px; --space-10: 128px;
+
+    --radius-sm: 4px; --radius-md: 8px; --radius-lg: 12px; --radius-xl: 20px; --radius-full: 9999px;
+
+    --font: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+
+    --ease: cubic-bezier(.2,0,0,1);
+    --motion-fast: 150ms; --motion-base: 200ms; --motion-slow: 300ms;
+
+    --maxw: 1240px;
+  }
+
+  :root[data-theme="dark"]{
+    color-scheme: dark;
+    --color-bg:        #0B1312;
+    --color-surface:   #16201F;
+    --color-border:    #2A3634;
+    --color-text:      #F5F4F0;
+    --color-text-muted:#9AA19E;
+    /* On a dark page the bronze (#8A6A16) drops to ~3.7:1 — under the
+       darkened gold's own text-contrast target — so accent switches to
+       the true brand gold, which is what actually holds 4.5:1+ here. */
+    --color-accent:    #EED26D;
+    --color-danger:    #FF6B63;
+    --color-success:   #3DDC84;
+  }
+
+  body{ transition:background-color var(--motion-base) var(--ease), color var(--motion-base) var(--ease); }
+  @media (prefers-reduced-motion: reduce){ body{ transition:none; } }
+
+  *,*::before,*::after{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior:auto; }
+    *,*::before,*::after{ animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; scroll-behavior:auto !important; }
+  }
+  body{
+    margin:0; background:var(--color-bg); color:var(--color-text);
+    font-family:var(--font); font-size:16px; line-height:1.5;
+    -webkit-font-smoothing:antialiased; overflow-wrap:anywhere;
+  }
+  img{ max-width:100%; display:block; }
+  a{ color:inherit; text-decoration:none; }
+  h1,h2,h3,h4{ margin:0; font-weight:700; line-height:1.15; letter-spacing:-0.01em; }
+  p{ margin:0; }
+  ul{ margin:0; padding:0; list-style:none; }
+  button{ font-family:inherit; cursor:pointer; }
+
+  .skip-link{
+    position:absolute; left:var(--space-4); top:-48px; z-index:100;
+    background:var(--band-bg); color:var(--band-text); padding:var(--space-3) var(--space-5);
+    border-radius:var(--radius-md); transition:top var(--motion-base) var(--ease);
+  }
+  .skip-link:focus{ top:var(--space-4); }
+
+  :focus-visible{ outline:2px solid var(--color-text); outline-offset:3px; border-radius:var(--radius-sm); }
+  .on-dark :focus-visible{ outline-color:var(--color-accent-soft); }
+
+  .wrap{ max-width:var(--maxw); margin-inline:auto; padding-inline:var(--space-5); }
+  @media (min-width:768px){ .wrap{ padding-inline:var(--space-7); } }
+
+  /* Grid/flex items default to min-width:auto, which floors their size at
+     their content's min-content width and can blow past the viewport on
+     narrow screens even though every track above is set to 1fr/100%.
+     Resetting the floor to 0 here is what actually makes R12 (works from
+     320px, no horizontal scroll) hold once real copy is dropped in. */
+  .wrap, .wrap *{ min-width:0; }
+  input, textarea{ min-width:0; }
+
+  .eyebrow{
+    display:inline-block; font-size:14px; font-weight:700; letter-spacing:.02em;
+    color:var(--color-accent); margin-bottom:var(--space-3);
+  }
+  section{ padding-block:var(--space-9); }
+  @media (min-width:900px){ section{ padding-block:var(--space-10); } }
+  .section-head{ max-width:640px; margin-bottom:var(--space-7); }
+  .section-head h2{ font-size:clamp(28px,3.6vw,44px); }
+  .section-head p{ margin-top:var(--space-4); color:var(--color-text-muted); font-size:18px; }
+
+  /* ---------- Buttons — all six states (R7) ---------- */
+  .btn{
+    display:inline-flex; align-items:center; gap:var(--space-2);
+    padding:14px 28px; border-radius:var(--radius-md); font-weight:700; font-size:16px;
+    border:1.5px solid transparent; min-height:44px;
+    transition:background var(--motion-fast) var(--ease), color var(--motion-fast) var(--ease), border-color var(--motion-fast) var(--ease), transform var(--motion-fast) var(--ease);
+  }
+  .btn:active{ transform:translateY(1px); }
+  .btn-primary{ background:var(--color-accent-soft); color:var(--band-bg); } /* fixed dark label — the gold fill's contrast partner never changes with theme */
+  .btn-primary:hover{ background:#e2bd4f; }
+  .btn-secondary{ background:transparent; color:var(--color-text); border-color:var(--color-text); }
+  .btn-secondary:hover{ background:var(--color-text); color:var(--color-bg); } /* inverts within the current theme's own bg/text pair, so it stays correct in both */
+  .on-dark .btn-secondary{ color:#fff; border-color:rgba(255,255,255,.5); }
+  .on-dark .btn-secondary:hover{ background:#fff; color:var(--band-bg); } /* hero is always a dark photo overlay — fixed pair regardless of site theme */
+  .btn[disabled]{ background:var(--color-border); color:var(--color-text-muted); border-color:transparent; cursor:not-allowed; }
+  .btn.is-loading{ position:relative; color:transparent !important; pointer-events:none; }
+  .btn.is-loading::after{
+    content:""; position:absolute; width:16px; height:16px; border-radius:50%;
+    border:2px solid currentColor; border-top-color:transparent; color:var(--band-bg); /* only ever shown on the gold .btn-primary fill */
+    animation:spin .7s linear infinite;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  /* Contained arrow — the one systematic link affordance (house taste #7) */
+  .arrow-link{ display:inline-flex; align-items:center; gap:var(--space-3); font-weight:700; }
+  .arrow-link .ring{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:40px; height:40px; border-radius:var(--radius-full);
+    border:1.5px solid var(--color-text); flex-shrink:0;
+    transition:background var(--motion-base) var(--ease), border-color var(--motion-base) var(--ease);
+  }
+  .arrow-link .ring svg{ transition:transform var(--motion-base) var(--ease); }
+  .arrow-link:hover .ring{ background:var(--band-bg); border-color:var(--band-bg); } /* fixed dark fill so the white icon below is always readable, in either theme */
+  .arrow-link:hover .ring svg{ transform:translateX(2px); stroke:#fff; }
+  .on-dark .arrow-link .ring{ border-color:rgba(255,255,255,.6); }
+  .on-dark .arrow-link:hover .ring{ background:var(--color-accent-soft); border-color:var(--color-accent-soft); }
+  .on-dark .arrow-link:hover .ring svg{ stroke:var(--band-bg); } /* icon-on-gold — always needs a dark mark, independent of site theme */
+
+  /* ---------- Header ---------- */
+  header{
+    position:sticky; top:0; z-index:50; background:rgba(255,255,255,.92);
+    backdrop-filter:blur(8px); border-bottom:1px solid var(--color-border);
+    transition:background-color var(--motion-base) var(--ease);
+  }
+  :root[data-theme="dark"] header{ background:rgba(11,19,18,.92); }
+  .nav{ display:flex; align-items:center; justify-content:space-between; padding-block:var(--space-3); gap:var(--space-5); }
+  .brand{ display:flex; align-items:center; gap:var(--space-3); font-weight:800; font-size:17px; }
+  .brand img{ height:38px; width:auto; border-radius:var(--radius-sm); }
+  .nav-links{ display:none; align-items:center; gap:var(--space-6); font-weight:600; font-size:15px; }
+  .nav-links a{ padding:var(--space-2) 0; border-bottom:2px solid transparent; transition:border-color var(--motion-fast) var(--ease), color var(--motion-fast) var(--ease); }
+  .nav-links a:hover{ color:var(--color-accent); border-color:var(--color-accent); }
+  .nav-links a[aria-current="page"]{ border-color:var(--color-text); }
+  @media (min-width:960px){ .nav-links{ display:flex; } }
+  .nav-cta{ display:flex; align-items:center; gap:var(--space-4); }
+  .nav-cta .phone{ display:none; font-weight:700; font-size:14px; }
+  @media (min-width:640px){ .nav-cta .phone{ display:inline; } }
+  .nav-cta .btn-primary{ display:none; } /* crowds the 320–479px header with the logo + toggle; the mobile menu and hero repeat this CTA */
+  @media (min-width:480px){ .nav-cta .btn-primary{ display:inline-flex; } }
+  .nav-toggle{ display:inline-flex; background:none; border:none; padding:var(--space-3); border-radius:var(--radius-md); min-width:44px; min-height:44px; align-items:center; justify-content:center; }
+  .nav-toggle:hover{ background:var(--color-surface); }
+  @media (min-width:960px){ .nav-toggle{ display:none; } }
+
+  .mobile-menu{
+    display:none; flex-direction:column; gap:var(--space-1); padding:var(--space-4) 0 var(--space-6);
+    border-top:1px solid var(--color-border);
+  }
+  .mobile-menu.is-open{ display:flex; }
+  .mobile-menu a{ padding:var(--space-3) 0; font-weight:600; }
+  @media (min-width:960px){ .mobile-menu{ display:none !important; } }
+
+  /* ---------- Hero ---------- */
+  .hero{ position:relative; height:min(88vh,820px); min-height:520px; overflow:hidden; color:#fff; }
+  .hero-slide{
+    position:absolute; inset:0; opacity:0; transition:opacity 900ms var(--ease);
+  }
+  .hero-slide.is-active{ opacity:1; }
+  .hero-slide img{ width:100%; height:100%; object-fit:cover; }
+  .hero-scrim{ position:absolute; inset:0; background:linear-gradient(180deg, rgba(11,19,18,.15) 0%, rgba(11,19,18,.55) 68%, rgba(11,19,18,.82) 100%); }
+  .hero-content{ position:relative; z-index:2; height:100%; display:flex; flex-direction:column; justify-content:flex-end; padding-bottom:var(--space-9); }
+  .hero h1{ font-size:clamp(36px,6vw,72px); max-width:16ch; }
+  .hero p.lede{ margin-top:var(--space-4); max-width:52ch; font-size:19px; color:rgba(255,255,255,.88); }
+  .hero-ctas{ display:flex; flex-wrap:wrap; gap:var(--space-4); margin-top:var(--space-6); }
+
+  .hero-pager{
+    position:absolute; right:var(--space-5); bottom:var(--space-5); z-index:3;
+    display:flex; align-items:center; gap:var(--space-3);
+    font-variant-numeric:tabular-nums; font-weight:700; font-size:14px; color:#fff;
+  }
+  @media (min-width:768px){ .hero-pager{ right:var(--space-7); bottom:var(--space-7); } }
+  .hero-pager .dots{ display:flex; gap:var(--space-1); }
+  .hero-pager .dot{
+    width:24px; height:24px; border-radius:var(--radius-full); background:transparent; border:none; padding:0;
+    display:flex; align-items:center; justify-content:center; /* 24x24 hit area, R6 — visible dot is the ::after */
+  }
+  .hero-pager .dot::after{
+    content:""; width:8px; height:8px; border-radius:var(--radius-full); background:rgba(255,255,255,.4);
+    transition:background var(--motion-base) var(--ease), transform var(--motion-base) var(--ease);
+  }
+  .hero-pager .dot.is-active::after{ background:var(--color-accent-soft); transform:scale(1.3); }
+  .hero-pager .count{ letter-spacing:.04em; }
+
+  /* ---------- Trust bar (F2 fix) ---------- */
+  .trust-bar{ padding-block:var(--space-8); background:var(--band-bg); color:var(--band-text); }
+  .trust-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:var(--space-6); text-align:center; }
+  @media (min-width:640px){ .trust-grid{ text-align:left; } }
+  .trust-stat .num{ font-size:clamp(32px,4.5vw,52px); font-weight:800; color:var(--color-accent-soft); font-variant-numeric:tabular-nums; }
+  .trust-stat .label{ margin-top:var(--space-2); font-size:15px; color:rgba(255,255,255,.75); font-weight:600; }
+
+  /* ---------- About ---------- */
+  .about{ display:grid; gap:var(--space-8); }
+  @media (min-width:900px){ .about{ grid-template-columns:1fr 1fr; align-items:center; } }
+  .about-copy p{ color:var(--color-text-muted); font-size:17px; margin-top:var(--space-4); }
+  .pillars{ margin-top:var(--space-6); display:grid; gap:var(--space-5); }
+  .pillar{ display:flex; gap:var(--space-4); }
+  .pillar .mark{ flex-shrink:0; width:36px; height:36px; border-radius:var(--radius-full); border:1.5px solid var(--color-accent); display:flex; align-items:center; justify-content:center; color:var(--color-accent); font-weight:800; font-size:14px; }
+  .pillar h4{ font-size:17px; }
+  .pillar p{ margin-top:var(--space-1); color:var(--color-text-muted); font-size:16px; }
+  .about-media{ position:relative; border-radius:var(--radius-lg); overflow:hidden; aspect-ratio:4/5; }
+  .about-media img{ width:100%; height:100%; object-fit:cover; }
+
+  /* ---------- Why choose us ---------- */
+  .why{ background:var(--color-surface); }
+  .why-grid{ display:grid; gap:var(--space-5); grid-template-columns:1fr; }
+  @media (min-width:640px){ .why-grid{ grid-template-columns:1fr 1fr; } }
+  @media (min-width:1024px){ .why-grid{ grid-template-columns:repeat(3,1fr); } }
+  .why-card{ background:var(--color-bg); border:1px solid var(--color-border); border-radius:var(--radius-lg); padding:var(--space-6); }
+  .why-card .idx{ font-size:14px; font-weight:800; color:var(--color-accent); }
+  .why-card h3{ font-size:19px; margin-top:var(--space-3); }
+  .why-card p{ margin-top:var(--space-2); color:var(--color-text-muted); font-size:16px; }
+
+  /* ---------- Projects ---------- */
+  .project-grid{ display:grid; gap:var(--space-6); grid-template-columns:1fr; }
+  @media (min-width:640px){ .project-grid{ grid-template-columns:1fr 1fr; } }
+  @media (min-width:1100px){ .project-grid{ grid-template-columns:repeat(3,1fr); } }
+  .project-card{ display:flex; flex-direction:column; }
+  .project-media{ position:relative; border-radius:var(--radius-lg); overflow:hidden; aspect-ratio:4/3; }
+  .project-media img{ width:100%; height:100%; object-fit:cover; transition:transform var(--motion-slow) var(--ease); }
+  .project-card:hover .project-media img{ transform:scale(1.04); }
+  .status-chip{
+    position:absolute; top:var(--space-3); left:var(--space-3); z-index:2;
+    padding:6px 12px; border-radius:var(--radius-full); font-size:13px; font-weight:700;
+    background:rgba(255,255,255,.92); color:var(--band-bg); /* overlays a photo, not the page — stays a fixed light chip in both themes */
+    display:flex; align-items:center; gap:6px;
+  }
+  .status-chip::before{ content:""; width:6px; height:6px; border-radius:50%; background:#1E6B3C; }
+  .status-chip[data-status="completed"]::before{ background:#5B615F; }
+  .project-body{ padding-top:var(--space-4); }
+  .project-body h3{ font-size:20px; }
+  .project-body .loc{ margin-top:4px; color:var(--color-text-muted); font-size:14px; }
+  .project-specs{ display:flex; gap:var(--space-4); margin-top:var(--space-3); font-size:13px; color:var(--color-text-muted); font-weight:600; }
+  .project-specs span{ padding-left:var(--space-4); border-left:1px solid var(--color-border); }
+  .project-specs span:first-child{ padding-left:0; border-left:none; }
+  .project-body .arrow-link{ margin-top:var(--space-4); font-size:14px; }
+  .project-body .arrow-link .ring{ width:32px; height:32px; }
+
+  /* ---------- Amenities — keeps the one pattern that already works ---------- */
+  .amenity-row{ display:flex; flex-wrap:wrap; gap:var(--space-7); justify-content:center; }
+  .amenity{ display:flex; flex-direction:column; align-items:center; gap:var(--space-3); width:110px; text-align:center; }
+  .amenity .avatar{
+    width:88px; height:88px; border-radius:var(--radius-full); border:2px solid transparent;
+    background:var(--color-surface); display:flex; align-items:center; justify-content:center;
+    transition:border-color var(--motion-slow) var(--ease);
+  }
+  .amenity:hover .avatar{ border-color:var(--color-accent-soft); }
+  .amenity .avatar img{ width:34px; height:34px; }
+  .amenity .name{ font-size:13px; font-weight:700; color:var(--color-text-muted); transition:color var(--motion-base) var(--ease); }
+  .amenity:hover .name{ color:var(--color-accent); }
+
+  /* ---------- How we work ---------- */
+  .steps{ display:grid; gap:var(--space-6); grid-template-columns:1fr; }
+  @media (min-width:768px){ .steps{ grid-template-columns:repeat(3,1fr); } }
+  .step{ position:relative; padding-top:var(--space-6); border-top:2px solid var(--color-border); }
+  .step .num{ font-size:14px; font-weight:800; color:var(--color-accent); }
+  .step h3{ margin-top:var(--space-3); font-size:19px; }
+  .step p{ margin-top:var(--space-2); color:var(--color-text-muted); font-size:16px; }
+
+  /* ---------- Honest trust block (replaces fabricated "Awards") ---------- */
+  .trust-note{ background:var(--band-bg); color:var(--band-text); border-radius:var(--radius-lg); padding:var(--space-7); display:grid; gap:var(--space-6); }
+  @media (min-width:768px){ .trust-note{ grid-template-columns:1fr auto; align-items:center; } }
+  .trust-note h3{ font-size:26px; max-width:36ch; }
+  .trust-note p{ margin-top:var(--space-3); color:rgba(255,255,255,.75); max-width:48ch; }
+  .rating{ display:flex; align-items:center; gap:var(--space-3); background:rgba(255,255,255,.08); padding:var(--space-4) var(--space-5); border-radius:var(--radius-md); }
+  .rating .score{ font-size:30px; font-weight:800; color:var(--color-accent-soft); }
+  .rating .meta{ font-size:13px; color:rgba(255,255,255,.7); }
+
+  /* ---------- Contact (F1 fix) ---------- */
+  .contact{ display:grid; gap:var(--space-8); }
+  @media (min-width:960px){ .contact{ grid-template-columns:0.9fr 1.1fr; } }
+  .contact-card{ background:var(--color-surface); border-radius:var(--radius-lg); padding:var(--space-7); }
+  .contact-row{ display:flex; gap:var(--space-4); padding-block:var(--space-4); border-bottom:1px solid var(--color-border); }
+  .contact-row:last-of-type{ border-bottom:none; }
+  .contact-row .ic{ flex-shrink:0; width:40px; height:40px; border-radius:var(--radius-full); background:var(--color-bg); border:1px solid var(--color-border); display:flex; align-items:center; justify-content:center; }
+  .contact-row h4{ font-size:14px; color:var(--color-text-muted); font-weight:700; }
+  .contact-row p, .contact-row a{ margin-top:2px; font-size:16px; font-weight:600; overflow-wrap:anywhere; }
+  .contact-row a:hover{ color:var(--color-accent); }
+  .map-card{ margin-top:var(--space-5); border-radius:var(--radius-md); overflow:hidden; border:1px solid var(--color-border); }
+  .map-card .map-static{ height:160px; background:var(--color-surface); display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; }
+  .map-card .map-static svg{ position:absolute; inset:0; width:100%; height:100%; }
+  .map-card .map-static svg path{ stroke:var(--color-border); }
+  .map-card .pin{ width:36px; height:36px; border-radius:50% 50% 50% 0; background:var(--color-accent-soft); border:2px solid var(--band-bg); transform:rotate(-45deg); box-shadow:0 4px 10px rgba(0,0,0,.25); position:relative; z-index:1; }
+  .map-card .directions{ display:flex; align-items:center; justify-content:space-between; padding:var(--space-4); font-size:14px; font-weight:700; }
+
+  .field{ margin-bottom:var(--space-5); }
+  .field label{ display:block; font-size:14px; font-weight:700; margin-bottom:var(--space-2); }
+  .field .req{ color:var(--color-danger); }
+  .field .help{ display:block; font-size:13px; color:var(--color-text-muted); margin-top:var(--space-2); min-height:18px; }
+  .field .help.is-error{ color:var(--color-danger); }
+  .field input, .field textarea{
+    width:100%; min-height:48px; padding:12px var(--space-4); font-family:inherit; font-size:16px;
+    border:1.5px solid var(--color-border); border-radius:var(--radius-md); background:var(--color-bg); color:var(--color-text);
+    transition:border-color var(--motion-fast) var(--ease);
+  }
+  .field textarea{ min-height:120px; resize:vertical; }
+  .field input:hover, .field textarea:hover{ border-color:var(--color-text-muted); }
+  .field input.is-invalid, .field textarea.is-invalid{ border-color:var(--color-danger); }
+  .field-row{ display:grid; gap:var(--space-4); grid-template-columns:1fr; }
+  @media (min-width:520px){ .field-row{ grid-template-columns:1fr 1fr; } }
+  .form-success{ display:none; align-items:center; gap:var(--space-3); background:#EAF5EE; color:#1E6B3C; border-radius:var(--radius-md); padding:var(--space-4) var(--space-5); font-weight:600; margin-top:var(--space-5); }
+  :root[data-theme="dark"] .form-success{ background:#173322; color:#79E6A8; }
+  .form-success.is-visible{ display:flex; }
+
+  /* ---------- Footer ---------- */
+  footer{ background:var(--band-bg); color:rgba(255,255,255,.7); padding-block:var(--space-8) var(--space-6); }
+  .footer-grid{ display:grid; gap:var(--space-7); grid-template-columns:1fr; }
+  @media (min-width:768px){ .footer-grid{ grid-template-columns:1.4fr 1fr 1fr 1fr; } }
+  .footer-brand{ display:flex; align-items:center; gap:var(--space-3); color:#fff; font-weight:800; font-size:16px; margin-bottom:var(--space-4); }
+  .footer-brand img{ height:32px; border-radius:var(--radius-sm); }
+  .footer-col h5{ color:#fff; font-size:13px; letter-spacing:.04em; margin-bottom:var(--space-4); }
+  .footer-col ul{ display:flex; flex-direction:column; gap:var(--space-3); font-size:14px; overflow-wrap:anywhere; }
+  .footer-col a:hover{ color:#fff; }
+  .footer-bottom{ margin-top:var(--space-8); padding-top:var(--space-5); border-top:1px solid rgba(255,255,255,.12); display:flex; flex-wrap:wrap; gap:var(--space-4); justify-content:space-between; font-size:13px; }
+
+  .visually-hidden{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+
+  /* ---------- Theme toggle — floating, fixed position, both themes ---------- */
+  .theme-toggle{
+    position:fixed; right:var(--space-5); bottom:var(--space-5); z-index:60;
+    width:56px; height:56px; border-radius:var(--radius-full);
+    background:var(--color-bg); color:var(--color-text); border:1.5px solid var(--color-border);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 8px 24px rgba(0,0,0,.18);
+    transition:background-color var(--motion-base) var(--ease), border-color var(--motion-base) var(--ease), transform var(--motion-fast) var(--ease);
+  }
+  .theme-toggle:hover{ transform:translateY(-2px); border-color:var(--color-accent); }
+  .theme-toggle:active{ transform:translateY(0); }
+  .theme-toggle svg{ width:22px; height:22px; }
+  .theme-toggle .icon-moon{ display:none; }
+  :root[data-theme="dark"] .theme-toggle .icon-sun{ display:none; }
+  :root[data-theme="dark"] .theme-toggle .icon-moon{ display:block; }
+  @media (max-width:640px){
+    .theme-toggle{ right:var(--space-4); bottom:var(--space-4); width:48px; height:48px; }
+    .theme-toggle svg{ width:19px; height:19px; }
+  }
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to content</a>
+
+<button id="themeToggle" class="theme-toggle" type="button" aria-pressed="false" aria-label="Switch to dark theme">
+  <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2.5M12 19v2.5M4.6 4.6l1.8 1.8M17.6 17.6l1.8 1.8M2.5 12H5M19 12h2.5M4.6 19.4l1.8-1.8M17.6 6.4l1.8-1.8"/></svg>
+  <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/></svg>
+</button>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="#top">
+      <img src="https://vishwahomespremium.in/_next/image?url=%2Fuploads%2Fsettings%2F1784982616341_949e.webp&w=640&q=75" alt="Vishwa Homes Premium Projects Pvt. Ltd. logo">
+      <span>Vishwa Homes<br><small style="font-weight:600;font-size:12px;color:var(--color-text-muted);">Premium Projects Pvt. Ltd.</small></span>
+    </a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="#projects">Projects</a>
+      <a href="#why">Why Us</a>
+      <a href="#amenities">Amenities</a>
+      <a href="#about">About</a>
+      <a href="#contact" aria-current="page">Contact</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="phone" href="tel:+919003000120">+91 90030 00120</a>
+      <a class="btn btn-primary" href="#contact">Book a Site Visit</a>
+      <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="mobileMenu" aria-label="Open menu">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+    </div>
+  </div>
+  <nav class="wrap mobile-menu" id="mobileMenu" aria-label="Mobile">
+    <a href="#projects">Projects</a>
+    <a href="#why">Why Us</a>
+    <a href="#amenities">Amenities</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
+    <a href="tel:+919003000120">Call +91 90030 00120</a>
+  </nav>
+</header>
+
+<main id="main">
+
+  <!-- ================= HERO ================= -->
+  <section class="hero on-dark" id="top" aria-roledescription="carousel" aria-label="Featured developments">
+    <div class="hero-slide is-active" data-slide="0">
+      <img src="https://vishwahomespremium.in/uploads/products/1780406279384_53fe.webp" alt="Hari Nivas villa community, Otthakadai, Madurai" loading="eager">
+    </div>
+    <div class="hero-slide" data-slide="1">
+      <img src="https://vishwahomespremium.in/uploads/products/1785848453605_3163.webp" alt="Luxury Farmhouse, Kodimanaglam, Sholavandan, Madurai" loading="lazy">
+    </div>
+    <div class="hero-scrim"></div>
+    <div class="wrap hero-content">
+      <span class="eyebrow" style="color:var(--color-accent-soft);">MADURAI, TAMIL NADU</span>
+      <h1>Elevated luxury, built on trust.</h1>
+      <p class="lede">Signature villas, apartments and gated communities across Madurai — designed with premium materials, delivered on the timeline we promise.</p>
+      <div class="hero-ctas">
+        <a class="btn btn-primary" href="#projects">View Our Projects</a>
+        <a class="btn btn-secondary" href="#contact">Book a Site Visit</a>
+      </div>
+    </div>
+    <div class="hero-pager">
+      <span class="count"><span id="slideCurrent">01</span> / 02</span>
+      <div class="dots" role="tablist" aria-label="Slides">
+        <button class="dot is-active" role="tab" aria-selected="true" aria-label="Show slide 1" data-goto="0"></button>
+        <button class="dot" role="tab" aria-selected="false" aria-label="Show slide 2" data-goto="1"></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= TRUST BAR (F2 fix — real numbers, always) ================= -->
+  <div class="trust-bar">
+    <div class="wrap trust-grid">
+      <div class="trust-stat"><div class="num" data-count="20" data-suffix=" Yrs">20 Yrs</div><div class="label">Years of Experience</div></div>
+      <div class="trust-stat"><div class="num" data-count="500" data-suffix="+">500+</div><div class="label">Happy Homes Delivered</div></div>
+      <div class="trust-stat"><div class="num" data-count="100" data-suffix="%">100%</div><div class="label">On-Time Handover</div></div>
+    </div>
+  </div>
+
+  <!-- ================= ABOUT ================= -->
+  <section id="about">
+    <div class="wrap about">
+      <div class="about-copy">
+        <span class="eyebrow">ABOUT US</span>
+        <h2 style="font-size:clamp(26px,3.2vw,38px);">A symbol of refined living and modern luxury</h2>
+        <p>Vishwa Homes Premium Projects Pvt. Ltd. is committed to transforming everyday living into an exceptional experience in Madurai — where comfort meets sophistication. Our vision is to redefine modern living through landmark spaces that blend luxury, comfort and innovation; our mission is to deliver every home on schedule, without surprises.</p>
+        <div class="pillars">
+          <div class="pillar">
+            <span class="mark">Q</span>
+            <div><h4>Uncompromising Quality</h4><p>Premium materials and superior craftsmanship in every project, without exception.</p></div>
+          </div>
+          <div class="pillar">
+            <span class="mark">T</span>
+            <div><h4>Complete Transparency</h4><p>Open communication and honoured commitments, from the first meeting to handover.</p></div>
+          </div>
+          <div class="pillar">
+            <span class="mark">D</span>
+            <div><h4>Timely Delivery</h4><p>Clearly defined plans and strict timelines — the promise our name is built on.</p></div>
+          </div>
+        </div>
+      </div>
+      <div class="about-media">
+        <img src="https://vishwahomespremium.in/_next/image?url=%2Fimages%2Fabout%2Fhomeabout2.jpg&w=1920&q=75" alt="Double-height minimalist staircase in a Vishwa Homes residence">
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= WHY CHOOSE US ================= -->
+  <section class="why" id="why">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">WHY CHOOSE US</span>
+        <h2>Built on trust, crafted for luxury</h2>
+        <p>From conceptual planning to on-site execution, every stage of a Vishwa Homes project meets the same standard.</p>
+      </div>
+      <div class="why-grid">
+        <div class="why-card"><span class="idx">01</span><h3>Premium Quality Construction</h3><p>Structural integrity and superior materials in every build, no shortcuts.</p></div>
+        <div class="why-card"><span class="idx">02</span><h3>Transparent Dealings</h3><p>Clear communication, honest pricing, and regular progress updates.</p></div>
+        <div class="why-card"><span class="idx">03</span><h3>On-Time Project Delivery</h3><p>Efficient site management so your home is ready when we said it would be.</p></div>
+        <div class="why-card"><span class="idx">04</span><h3>Customer-First Approach</h3><p>Your needs shape the design and execution of every home we build.</p></div>
+        <div class="why-card"><span class="idx">05</span><h3>Smart, Modern Designs</h3><p>Aesthetics and function integrated into every floor plan.</p></div>
+        <div class="why-card"><span class="idx">06</span><h3>Trusted Brand Value</h3><p>A legacy built one satisfied homeowner at a time.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= PROJECTS ================= -->
+  <section id="projects">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">ONGOING &amp; COMPLETED</span>
+        <h2>Our active developments</h2>
+        <p>Superior design and quality execution across residential, hospitality and commercial developments in Madurai.</p>
+      </div>
+      <div class="project-grid">
+
+        <article class="project-card">
+          <div class="project-media">
+            <span class="status-chip" data-status="ongoing">Ongoing</span>
+            <img src="https://vishwahomespremium.in/uploads/products/1780406279384_53fe.webp" alt="Hari Nivas villa community" loading="lazy">
+          </div>
+          <div class="project-body">
+            <h3>Hari Nivas</h3>
+            <p class="loc">Otthakadai, Madurai</p>
+            <div class="project-specs"><span>Villas, 1250 sq.ft plots</span><span>5000 sq.ft built-up</span></div>
+            <a class="arrow-link" href="#"><span class="ring"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>View Details</a>
+          </div>
+        </article>
+
+        <article class="project-card">
+          <div class="project-media">
+            <span class="status-chip" data-status="ongoing">Ongoing</span>
+            <img src="https://vishwahomespremium.in/uploads/products/1788182502549_458d.webp" alt="Ananya Apartment" loading="lazy">
+          </div>
+          <div class="project-body">
+            <h3>Ananya Apartment</h3>
+            <p class="loc">Uthangudi, Madurai</p>
+            <div class="project-specs"><span>Apartment</span><span>1500 sq.ft</span></div>
+            <a class="arrow-link" href="#"><span class="ring"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>View Details</a>
+          </div>
+        </article>
+
+        <article class="project-card">
+          <div class="project-media">
+            <span class="status-chip" data-status="ongoing">Ongoing</span>
+            <img src="https://vishwahomespremium.in/uploads/products/1785848453605_3163.webp" alt="Luxury Farmhouse, Sholavandan" loading="lazy">
+          </div>
+          <div class="project-body">
+            <h3>Luxury Farmhouse</h3>
+            <p class="loc">Kodimanaglam, Sholavandan, Madurai</p>
+            <div class="project-specs"><span>Private Residence</span><span>3494 sq.ft</span></div>
+            <a class="arrow-link" href="#"><span class="ring"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>View Details</a>
+          </div>
+        </article>
+
+        <article class="project-card">
+          <div class="project-media">
+            <span class="status-chip" data-status="ongoing">Ongoing</span>
+            <img src="https://vishwahomespremium.in/_next/image?url=%2Fuploads%2Fproducts%2F1785848716297_3df6.webp&w=1200&q=75" alt="Hotel Vishwa's Inn" loading="lazy">
+          </div>
+          <div class="project-body">
+            <h3>Hotel Vishwa's Inn</h3>
+            <p class="loc">Othakadai, Madurai</p>
+            <div class="project-specs"><span>Hotel, Restaurant</span><span>15,495 sq.ft</span></div>
+            <a class="arrow-link" href="#"><span class="ring"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>View Details</a>
+          </div>
+        </article>
+
+        <article class="project-card">
+          <div class="project-media">
+            <span class="status-chip" data-status="completed">Completed</span>
+            <img src="https://vishwahomespremium.in/_next/image?url=%2Fuploads%2Fproducts%2F1780409234395_da42.webp&w=1200&q=75" alt="Signature villas, Valar Nagar" loading="lazy">
+          </div>
+          <div class="project-body">
+            <h3>Signature</h3>
+            <p class="loc">Valar Nagar, Madurai</p>
+            <div class="project-specs"><span>22 Villas</span><span>1500 sq.ft</span></div>
+            <a class="arrow-link" href="#"><span class="ring"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>View Details</a>
+          </div>
+        </article>
+
+        <article class="project-card">
+          <div class="project-media">
+            <span class="status-chip" data-status="completed">Completed</span>
+            <img src="https://vishwahomespremium.in/_next/image?url=%2Fuploads%2Fproducts%2F1781699156033_05bf.webp&w=1200&q=75" alt="Vilva Prime villas" loading="lazy">
+          </div>
+          <div class="project-body">
+            <h3>Vilva Prime</h3>
+            <p class="loc">Othakadai, Madurai</p>
+            <div class="project-specs"><span>Villa</span><span>5000 sq.ft</span></div>
+            <a class="arrow-link" href="#"><span class="ring"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>View Details</a>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= AMENITIES (keeps the one pattern that already worked) ================= -->
+  <section class="why" id="amenities">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">EXPLORE OUR AMENITIES</span>
+        <h2>Comfort, curated for modern living</h2>
+        <p>Featured amenities from Hari Nivas — every development's amenity list is shown in full on its own project page.</p>
+      </div>
+      <div class="amenity-row">
+        <div class="amenity"><span class="avatar"><img src="https://vishwahomespremium.in/uploads/amenities/1765263769602_0edc.svg" alt=""></span><span class="name">Club House</span></div>
+        <div class="amenity"><span class="avatar"><img src="https://vishwahomespremium.in/uploads/amenities/1764915721580_bb06.svg" alt=""></span><span class="name">Swimming Pool</span></div>
+        <div class="amenity"><span class="avatar"><img src="https://vishwahomespremium.in/uploads/amenities/1764915773736_a74a.svg" alt=""></span><span class="name">Kids Play Area</span></div>
+        <div class="amenity"><span class="avatar"><img src="https://vishwahomespremium.in/uploads/amenities/1765263531518_101c.svg" alt=""></span><span class="name">Lift</span></div>
+        <div class="amenity"><span class="avatar"><img src="https://vishwahomespremium.in/uploads/amenities/1765263576160_ec74.svg" alt=""></span><span class="name">CCTV</span></div>
+        <div class="amenity"><span class="avatar"><img src="https://vishwahomespremium.in/uploads/amenities/1765263665334_5891.svg" alt=""></span><span class="name">Private Garden</span></div>
+        <div class="amenity"><span class="avatar"><img src="https://vishwahomespremium.in/_next/image?url=%2Fuploads%2Famenities%2F1784964965156_d16f.webp&w=128&q=75" alt=""></span><span class="name">Gym</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= HOW WE WORK ================= -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">HOW WE WORK</span>
+        <h2>A simple, transparent process</h2>
+        <p>From consultation to final handover — a genuine three-stage sequence, which is why it's numbered.</p>
+      </div>
+      <div class="steps">
+        <div class="step"><span class="num">01</span><h3>Consultation &amp; Planning</h3><p>We understand your vision and create a detailed plan tailored to your needs.</p></div>
+        <div class="step"><span class="num">02</span><h3>Design &amp; Execution</h3><p>Our team designs, builds and manages every phase with precision and quality.</p></div>
+        <div class="step"><span class="num">03</span><h3>Final Delivery</h3><p>On-time handover with complete transparency and a walkthrough of your home.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= HONEST TRUST BLOCK (replaces fabricated "Awards") ================= -->
+  <section>
+    <div class="wrap">
+      <div class="trust-note on-dark">
+        <div>
+          <h3>Rated by the residents who live in our developments.</h3>
+          <p>We'd rather show you our actual Google rating than a list of unverifiable awards. Read the reviews yourself before booking a visit.</p>
+        </div>
+        <div class="rating">
+          <span class="score">4.5★</span>
+          <span class="meta">Google Reviews<br>Hari Nivas, Madurai</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CONTACT (F1 fix — fully static, always renders) ================= -->
+  <section id="contact">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">GET IN TOUCH</span>
+        <h2>Book a site visit</h2>
+        <p>Speak with our team directly, or send a few details and we'll call you back — usually the same day.</p>
+      </div>
+      <div class="contact">
+
+        <div class="contact-card">
+          <div class="contact-row">
+            <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span>
+            <div><h4>Call Support 24×7</h4><a href="tel:+919003000120">+91 90030 00120</a></div>
+          </div>
+          <div class="contact-row">
+            <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="m4 6 8 7 8-7"/></svg></span>
+            <div><h4>Email</h4><a href="mailto:vishwahomes5005@gmail.com">vishwahomes5005@gmail.com</a></div>
+          </div>
+          <div class="contact-row">
+            <span class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
+            <div><h4>Office</h4><p>Madurai, Tamil Nadu, India</p></div>
+          </div>
+
+          <div class="map-card">
+            <div class="map-static">
+              <svg viewBox="0 0 400 160" preserveAspectRatio="none" aria-hidden="true">
+                <path d="M0 120 L60 90 L120 130 L200 70 L280 110 L400 60" stroke-width="2" fill="none"/>
+                <path d="M0 40 L100 60 L220 20 L340 55 L400 30" stroke-width="2" fill="none"/>
+              </svg>
+              <span class="pin"></span>
+            </div>
+            <div class="directions">
+              <span>Get directions to our site office</span>
+              <a class="arrow-link" href="https://maps.google.com/?cid=12225460186241413666" target="_blank" rel="noopener">
+                <span class="ring" style="width:32px;height:32px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <form class="contact-card" id="leadForm" novalidate>
+          <div class="field-row">
+            <div class="field">
+              <label for="fname">Full name <span class="req">*</span></label>
+              <input type="text" id="fname" name="fname" required autocomplete="name">
+              <span class="help" data-help-for="fname"></span>
+            </div>
+            <div class="field">
+              <label for="fphone">Mobile number <span class="req">*</span></label>
+              <input type="tel" id="fphone" name="fphone" required autocomplete="tel" placeholder="10-digit number">
+              <span class="help" data-help-for="fphone"></span>
+            </div>
+          </div>
+          <div class="field">
+            <label for="femail">Email address</label>
+            <input type="email" id="femail" name="femail" autocomplete="email">
+            <span class="help" data-help-for="femail"></span>
+          </div>
+          <div class="field">
+            <label for="fmsg">What are you looking for? (optional)</label>
+            <textarea id="fmsg" name="fmsg" placeholder="E.g. 3BHK villa near Othakadai, budget range, timeline…"></textarea>
+            <span class="help"></span>
+          </div>
+          <button class="btn btn-primary" type="submit" id="leadSubmit" style="width:100%;justify-content:center;">Request a Call Back</button>
+          <div class="form-success" id="formSuccess" role="status">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
+            Thanks — our team will call you back shortly.
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap footer-grid">
+    <div>
+      <div class="footer-brand">
+        <img src="https://vishwahomespremium.in/_next/image?url=%2Fuploads%2Fsettings%2F1784982616341_949e.webp&w=640&q=75" alt="">
+        Vishwa Homes Premium Projects Pvt. Ltd.
+      </div>
+      <p style="max-width:34ch;font-size:14px;">20 years of building trust in Madurai — quality, transparency, and on-time delivery, every time.</p>
+    </div>
+    <div class="footer-col">
+      <h5>DEVELOPMENTS</h5>
+      <ul><li><a href="#projects">Residential</a></li><li><a href="#projects">Commercial</a></li><li><a href="#projects">Hospitality</a></li><li><a href="#projects">Joint Venture</a></li></ul>
+    </div>
+    <div class="footer-col">
+      <h5>COMPANY</h5>
+      <ul><li><a href="#about">About Us</a></li><li><a href="#why">Why Choose Us</a></li><li><a href="#">Careers</a></li><li><a href="#">Blog</a></li></ul>
+    </div>
+    <div class="footer-col">
+      <h5>CONTACT</h5>
+      <ul><li><a href="tel:+919003000120">+91 90030 00120</a></li><li><a href="mailto:vishwahomes5005@gmail.com">vishwahomes5005@gmail.com</a></li><li>Madurai, Tamil Nadu</li></ul>
+    </div>
+  </div>
+  <div class="wrap footer-bottom">
+    <span>© 2026 Vishwa Homes Premium Projects Pvt. Ltd. All rights reserved.</span>
+    <span>Template built to accompany the UX audit — not the live site.</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Theme toggle — defaults to the visitor's system preference, then
+  // switches on click. Kept in memory only (not localStorage): this file
+  // is often opened inside an in-app preview, which doesn't reliably keep
+  // site storage. Wiring `localStorage.setItem('theme', theme)` /
+  // `getItem` here is the one change needed to persist it on a real host.
+  (function initTheme(){
+    var root = document.documentElement;
+    var toggle = document.getElementById('themeToggle');
+    var theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    function apply(t){
+      theme = t;
+      root.setAttribute('data-theme', t);
+      toggle.setAttribute('aria-pressed', t === 'dark' ? 'true' : 'false');
+      toggle.setAttribute('aria-label', t === 'dark' ? 'Switch to light theme' : 'Switch to dark theme');
+    }
+    apply(theme);
+    toggle.addEventListener('click', function(){ apply(theme === 'dark' ? 'light' : 'dark'); });
+  })();
+
+  // Mobile nav toggle
+  var toggle = document.getElementById('navToggle');
+  var menu = document.getElementById('mobileMenu');
+  toggle.addEventListener('click', function(){
+    var open = menu.classList.toggle('is-open');
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+
+  // Hero carousel — accessible, labelled, always shows a valid "current / total"
+  var slides = document.querySelectorAll('.hero-slide');
+  var dots = document.querySelectorAll('.hero-pager .dot');
+  var counter = document.getElementById('slideCurrent');
+  var current = 0, timer;
+  function goTo(i){
+    slides[current].classList.remove('is-active');
+    dots[current].classList.remove('is-active');
+    dots[current].setAttribute('aria-selected','false');
+    current = i;
+    slides[current].classList.add('is-active');
+    dots[current].classList.add('is-active');
+    dots[current].setAttribute('aria-selected','true');
+    counter.textContent = String(current + 1).padStart(2,'0');
+  }
+  dots.forEach(function(d){ d.addEventListener('click', function(){ goTo(parseInt(d.dataset.goto,10)); resetTimer(); }); });
+  function resetTimer(){
+    clearInterval(timer);
+    if(!reduceMotion){ timer = setInterval(function(){ goTo((current+1) % slides.length); }, 6000); }
+  }
+  resetTimer();
+
+  // Count-up stats — text already holds the real value; this only animates it.
+  var stats = document.querySelectorAll('.trust-stat .num');
+  if('IntersectionObserver' in window && !reduceMotion){
+    stats.forEach(function(el){
+      var target = parseInt(el.dataset.count, 10);
+      var suffix = el.dataset.suffix || '';
+      var done = false;
+      var obs = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if(entry.isIntersecting && !done){
+            done = true;
+            var start = null;
+            function step(ts){
+              if(!start) start = ts;
+              var progress = Math.min((ts - start) / 900, 1);
+              el.textContent = Math.round(progress * target) + suffix;
+              if(progress < 1){ requestAnimationFrame(step); }
+              else { el.textContent = target + suffix; }
+            }
+            requestAnimationFrame(step);
+            obs.unobserve(el);
+          }
+        });
+      }, { threshold: 0.5 });
+      obs.observe(el);
+    });
+  }
+  // If IntersectionObserver is unsupported or motion is reduced, the original
+  // server-rendered value (e.g. "500+") is left exactly as it is. No blanks.
+
+  // Contact form — validate on blur, never disable submit, always show a real state.
+  var form = document.getElementById('leadForm');
+  var success = document.getElementById('formSuccess');
+  function validateField(input){
+    var help = form.querySelector('[data-help-for="'+input.id+'"]');
+    if(!help) return true;
+    var valid = input.checkValidity();
+    if(input.id === 'fphone' && input.value){
+      valid = /^\d{10}$/.test(input.value.replace(/\D/g,''));
+    }
+    input.classList.toggle('is-invalid', !valid && input.value !== '');
+    help.classList.toggle('is-error', !valid && input.value !== '');
+    help.textContent = (!valid && input.value !== '')
+      ? (input.id === 'fphone' ? 'Enter a valid 10-digit mobile number.' : 'This doesn\'t look right — please check it.')
+      : '';
+    return valid || input.value === '' && !input.required;
+  }
+  form.querySelectorAll('input').forEach(function(input){
+    input.addEventListener('blur', function(){ validateField(input); });
+  });
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    var ok = true;
+    form.querySelectorAll('input[required]').forEach(function(input){
+      if(!input.value || !validateField(input)) ok = false;
+    });
+    if(!ok){ form.querySelector('.is-invalid, input:invalid')?.focus(); return; }
+    var btn = document.getElementById('leadSubmit');
+    btn.classList.add('is-loading');
+    setTimeout(function(){
+      btn.classList.remove('is-loading');
+      success.classList.add('is-visible');
+      form.reset();
+    }, 900);
+    // Wire this to your CRM/lead endpoint — this demo has no backend.
+  });
+})();
+</script>
+
+</body>
+</html>
